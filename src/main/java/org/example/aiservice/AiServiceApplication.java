@@ -13,7 +13,7 @@ public class AiServiceApplication {
         SpringApplication.run(AiServiceApplication.class, args);
     }
 
-    // 关键步骤：注册这个 Bean，这样我们在其他地方就能直接注入使用
+    // 关键步骤：注册这个 Bean，这样我们在其他地方就能直接注入使用了
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
