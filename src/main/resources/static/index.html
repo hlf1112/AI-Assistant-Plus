@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智能文档助手 - 登录</title>
+    <!-- Markdown 解析库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 1. 认证视图 (登录/注册) -->
+<div id="auth-view" class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo-icon"><i class="fa-solid fa-robot"></i></div>
+            <h2>AI Doc Assistant</h2>
+            <p>基于 Gemini 3.0 & DeepSeek 的智能知识库</p>
+        </div>
+
+        <!-- 登录表单 -->
+        <div id="login-form" class="auth-form">
+            <div class="input-group-auth">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="login-username" placeholder="用户名">
+            </div>
+            <div class="input-group-auth">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="login-password" placeholder="密码">
+            </div>
+            <button onclick="login()" class="btn-primary full-width">登 录</button>
+
+            <!-- 游客试用按钮 -->
+            <button onclick="showAppAsGuest()" class="btn-action full-width" style="background:#95a5a6; margin-top:10px;">
+                <i class="fa-solid fa-user-secret"></i> 游客试用 (3次机会)
+            </button>
+
+            <div class="auth-footer">
+                <span>还没有账号? <a href="#" onclick="toggleAuthMode('register')">立即注册</a></span>
+            </div>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="register-form" class="auth-form hidden">
+            <div class="input-group-auth">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="reg-username" placeholder="设置用户名">
+            </div>
+            <div class="input-group-auth">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="reg-password" placeholder="设置密码">
+            </div>
+            <div class="input-group-auth">
+                <i class="fa-solid fa-check-double"></i>
+                <input type="password" id="reg-confirm" placeholder="确认密码">
+            </div>
+            <button onclick="register()" class="btn-success full-width">注 册</button>
+            <div class="auth-footer">
+                <span>已有账号? <a href="#" onclick="toggleAuthMode('login')">返回登录</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 主应用视图 -->
+<div id="app-view" class="app-container hidden">
+
+    <!-- 顶部导航栏 -->
+    <header class="app-header">
+        <div class="header-left">
+            <i class="fa-solid fa-rocket logo-spin"></i>
+            <h3>AI 智能文档助手 <span class="badge">V2.0</span></h3>
+        </div>
+        <div class="header-right">
+            <span class="user-greeting">你好, <strong id="display-username">User</strong></span>
+            <button id="auth-btn-area" onclick="logout()" class="btn-logout" title="退出登录">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <!-- 左侧：功能控制区 -->
+        <div class="panel control-panel">
+            <button onclick="startNewChat()" class=\"btn-new-chat\">
+                <i class="fa-solid fa-plus"></i> 发起新对话
+            </button>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+            <!-- 知识库管理 -->
+            <div class="panel-section">
+                <h4><i class="fa-solid fa-book-open"></i> 知识库管理</h4>
+
+                <div class="control-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ragSwitch" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="label-text">启用文档知识库 (RAG)</span>
+                </div>
+
+                <div class="upload-area">
+                    <input type="file" id="fileInput" accept=".pdf,.docx" class="hidden-file-input">
+                    <label for="fileInput" class="upload-btn-label">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> 选择文档 (PDF/Word)
+                    </label>
+                    <span id="fileNameDisplay" class="file-name">未选择文件</span>
+
+                    <div class="btn-row">
+                        <button onclick="uploadAndTrain()" id="btnTrain" class="btn-action primary">
+                            <i class="fa-solid fa-brain"></i> 上传并学习
+                        </button>
+                        <button onclick="resetKb()" id="btnReset" class="btn-action danger">
+                            <i class="fa-solid fa-trash-can"></i> 清空
+                        </button>
+                    </div>
+                </div>
+                <div id="status" class="status-box">准备就绪</div>
+            </div>
+
+            <!-- 历史记录区域 -->
+            <div class="panel-section history-section">
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> 历史记录</h4>
+                <button onclick="loadHistory()" class="btn-action" style="background: #6c5ce7; width: 100%; margin-bottom: 10px;">
+                    <i class="fa-solid fa-rotate"></i> 刷新历史记录
+                </button>
+                <div id="history-list" class="history-list">
+                    <!-- JS 填充内容 -->
+                    <div class="empty-history">暂无数据</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：聊天区 -->
+        <div class="panel chat-panel">
+            <div id="chatBox" class="chat-box">
+                <div class="msg-row">
+                    <div class="ai-label">AI 助手</div>
+                    <div class="ai-msg">你好！我是你的智能文档助手。你可以上传文档让我学习，或者直接问我问题。</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="question" placeholder="输入你的问题..." onkeydown="if(event.keyCode==13) ask()">
+                <button onclick="ask()" id="btnSend" class="btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
